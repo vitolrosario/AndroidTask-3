@@ -1,23 +1,43 @@
 package com.example.a20130379.androidtask_3;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
+
+import com.example.a20130379.androidtask_3.RVCountryLists.Country;
+import com.example.a20130379.androidtask_3.RVCountryLists.CountryAdapter;
 import com.example.hi.androidtask2.GeneralClass;
 
 import com.apptakk.http_request.HttpRequest;
 import com.apptakk.http_request.HttpRequestTask;
 import com.apptakk.http_request.HttpResponse;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+
+    private AppCompatButton btnSearch;
+    ArrayList<Country> countryList;
+    ArrayList<Country> countryListModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +54,26 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+
+        btnSearch = findViewById(R.id.btn_search);
+
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                intent.putExtra("email", email);
+                startActivity(intent);*/
+
+                EditText countryEditText = (EditText) findViewById(R.id.country_query);
+
+                String query = countryEditText.getText().toString();
+
+                // Initialize contacts
+                searchCountryList(query);
+            }
+        });
+
     }
 
     @Override
@@ -59,34 +99,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void searchAnimeList(String query)
+    public void searchCountryList(String query)
     {
         new HttpRequestTask(
-                new HttpRequest("http://beca.diplomado.mescyt.gob.do/Convocatoria/GetCiudades?PaisId=187", HttpRequest.GET, null),
+                new HttpRequest("https://restcountries.eu/rest/v2/name/" + query, HttpRequest.GET, null),
                 new HttpRequest.Handler() {
                     @Override
                     public void response(HttpResponse response) {
-                        JSONArray obj = new JSONArray();
+                        JSONArray responseList = new JSONArray();
                         String strobj = "";
                         try {
-                            obj = new JSONArray(response.body);
-                            strobj = obj.getJSONObject(0).getString("descripcion");
+                            responseList = new JSONArray(response.body);
+                            Type listType = new TypeToken<ArrayList<Country>>(){}.getType();
+                            countryListModel = new Gson().fromJson(response.body, listType);
+                            countryList = new ArrayList<Country>();
+                            countryList.addAll(countryListModel);
+
+                            RecyclerView rvCountry = (RecyclerView) findViewById(R.id.rvCountryList);
+                            CountryAdapter adapter = new CountryAdapter(countryListModel, MainActivity.this);
+                            rvCountry.setAdapter(adapter);
+                            rvCountry.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+
+                            /*for (int i = 0; i < responseList.length(); i++) {
+                                countryList.add(new Country(responseList.getJSONObject(i).getString("Name")));
+                            }*/
                         }
                         catch (Exception e)
                         {
 
                         }
-
-                        if (response.code == 200) {
-                            GeneralClass.showErrorDialog("Test", strobj, ProfileActivity.this);
-                            Log.d(this.getClass().toString(), "Request successful!");
-                        } else {
-                            GeneralClass.showErrorDialog("Error",response.body, ProfileActivity.this);
-                            Log.e(this.getClass().toString(), "Request unsuccessful: " + response);
-                        }
                     }
                 }).execute();
-
     }
 
 }
