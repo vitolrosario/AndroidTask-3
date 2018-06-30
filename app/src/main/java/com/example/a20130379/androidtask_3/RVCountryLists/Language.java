@@ -1,6 +1,8 @@
 package com.example.a20130379.androidtask_3.RVCountryLists;
 
-public class Language {
+import java.io.Serializable;
+
+public class Language implements Serializable {
 
     private String name;
     private String nativeName;

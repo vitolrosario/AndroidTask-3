@@ -1,5 +1,7 @@
 package com.example.a20130379.androidtask_3;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +16,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.a20130379.androidtask_3.RVCountryLists.Country;
 import com.example.a20130379.androidtask_3.RVCountryLists.CountryAdapter;
@@ -36,7 +40,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     private AppCompatButton btnSearch;
-    ArrayList<Country> countryList;
+//    private LinearLayout btnDetail;
+    static ArrayList<Country> countryList;
     ArrayList<Country> countryListModel;
 
     @Override
@@ -46,30 +51,24 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
+        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
 
         btnSearch = findViewById(R.id.btn_search);
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                intent.putExtra("email", email);
-                startActivity(intent);*/
-
                 EditText countryEditText = (EditText) findViewById(R.id.country_query);
-
                 String query = countryEditText.getText().toString();
-
-                // Initialize contacts
                 searchCountryList(query);
             }
         });
@@ -101,29 +100,30 @@ public class MainActivity extends AppCompatActivity {
 
     public void searchCountryList(String query)
     {
+        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
+
         new HttpRequestTask(
                 new HttpRequest("https://restcountries.eu/rest/v2/name/" + query, HttpRequest.GET, null),
                 new HttpRequest.Handler() {
                     @Override
                     public void response(HttpResponse response) {
-                        JSONArray responseList = new JSONArray();
-                        String strobj = "";
                         try {
-                            responseList = new JSONArray(response.body);
                             Type listType = new TypeToken<ArrayList<Country>>(){}.getType();
                             countryListModel = new Gson().fromJson(response.body, listType);
                             countryList = new ArrayList<Country>();
                             countryList.addAll(countryListModel);
 
                             RecyclerView rvCountry = (RecyclerView) findViewById(R.id.rvCountryList);
-                            CountryAdapter adapter = new CountryAdapter(countryListModel, MainActivity.this);
+                            CountryAdapter adapter = new CountryAdapter(countryListModel, MainActivity.this, MainActivity.this);
                             rvCountry.setAdapter(adapter);
                             rvCountry.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-
 
                             /*for (int i = 0; i < responseList.length(); i++) {
                                 countryList.add(new Country(responseList.getJSONObject(i).getString("Name")));
                             }*/
+
+                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
                         }
                         catch (Exception e)
                         {
@@ -131,6 +131,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }).execute();
+    }
+
+    public void CallDetailIntent(String countryCode)
+    {
+        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+        intent.putExtra("detail", countryList);
+        intent.putExtra("keyDetail", countryCode);
+        startActivity(intent);
     }
 
 }

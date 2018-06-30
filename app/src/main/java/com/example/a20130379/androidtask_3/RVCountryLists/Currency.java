@@ -1,6 +1,8 @@
 package com.example.a20130379.androidtask_3.RVCountryLists;
 
-public class Currency {
+import java.io.Serializable;
+
+public class Currency implements Serializable {
 
     private String code;
     private String name;

@@ -1,8 +1,9 @@
 package com.example.a20130379.androidtask_3.RVCountryLists;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Country {
+public class Country implements Serializable {
 
     private String name;
     private String capital;
@@ -15,9 +16,16 @@ public class Country {
     private List<Currency> currencies = null;
     private List<Language> languages = null;
     private String flag;
+    private List<String> callingCodes = null;
+    private String subregion;
 
     public Country(String name) {
-        name = name;
+        this.name = name;
+    }
+    public Country(String numericCode, int test) {
+        this.numericCode = numericCode;
+    }
+    public Country() {
     }
 
 
@@ -109,6 +117,22 @@ public class Country {
 
     public void setFlag(String flag) {
         this.flag = flag;
+    }
+
+    public List<String> getCallingCodes() {
+        return callingCodes;
+    }
+
+    public void setCallingCodes(List<String> callingCodes) {
+        this.callingCodes = callingCodes;
+    }
+
+    public void setSubregion(String subregion) {
+        this.subregion = subregion;
+    }
+
+    public String getSubregion() {
+        return subregion;
     }
 
 }
