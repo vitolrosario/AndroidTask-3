@@ -13,7 +13,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/search_country"
-        android:textSize="30sp"/>
+        android:textSize="30sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="10dp"/>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -39,13 +41,14 @@
             android:hint="Type here..."/>
         </android.support.design.widget.TextInputLayout>
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/btn_search"
+
+        <ImageButton
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="50dp"
+            android:src="@drawable/search"
             android:layout_weight="5"
-            android:layout_marginEnd="10dp"
-            android:drawableStart="@drawable/search"/>
+            android:layout_gravity="center"
+            android:id="@+id/btn_search"/>
 
     </LinearLayout>
 

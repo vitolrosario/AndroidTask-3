@@ -15,12 +15,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.a20130379.androidtask_3.RVCountryLists.Country;
 import com.example.a20130379.androidtask_3.RVCountryLists.CountryAdapter;
+import com.example.a20130379.androidtask_3.RVCountryLists.RecyclerViewClickListener;
 import com.example.hi.androidtask2.GeneralClass;
 
 import com.apptakk.http_request.HttpRequest;
@@ -36,11 +39,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecyclerViewClickListener {
 
 
-    private AppCompatButton btnSearch;
-//    private LinearLayout btnDetail;
+    private ImageButton btnSearch;
     static ArrayList<Country> countryList;
     ArrayList<Country> countryListModel;
 
@@ -48,17 +50,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         findViewById(R.id.loadingPanel).setVisibility(View.GONE);
 
@@ -70,9 +61,20 @@ public class MainActivity extends AppCompatActivity {
                 EditText countryEditText = (EditText) findViewById(R.id.country_query);
                 String query = countryEditText.getText().toString();
                 searchCountryList(query);
+                if (view != null) {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
             }
         });
 
+        CountryAdapter adapter = new CountryAdapter(countryList, this, this);
+
+    }
+
+    @Override
+    public void recyclerViewListClicked(View v, Country country) {
+        CallDetailIntent(country);
     }
 
     @Override
@@ -110,19 +112,12 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             Type listType = new TypeToken<ArrayList<Country>>(){}.getType();
                             countryListModel = new Gson().fromJson(response.body, listType);
-                            countryList = new ArrayList<Country>();
-                            countryList.addAll(countryListModel);
 
-                            RecyclerView rvCountry = (RecyclerView) findViewById(R.id.rvCountryList);
-                            CountryAdapter adapter = new CountryAdapter(countryListModel, MainActivity.this, MainActivity.this);
-                            rvCountry.setAdapter(adapter);
-                            rvCountry.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-
-                            /*for (int i = 0; i < responseList.length(); i++) {
-                                countryList.add(new Country(responseList.getJSONObject(i).getString("Name")));
-                            }*/
+                            FillAdapter(countryListModel);
 
                             findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+
+
 
                         }
                         catch (Exception e)
@@ -133,12 +128,19 @@ public class MainActivity extends AppCompatActivity {
                 }).execute();
     }
 
-    public void CallDetailIntent(String countryCode)
+    public void CallDetailIntent(Country country)
     {
         Intent intent = new Intent(MainActivity.this, DetailActivity.class);
-        intent.putExtra("detail", countryList);
-        intent.putExtra("keyDetail", countryCode);
+        intent.putExtra("detail", country);
         startActivity(intent);
+    }
+
+    private void FillAdapter(ArrayList<Country> list)
+    {
+        RecyclerView rvCountry = (RecyclerView) findViewById(R.id.rvCountryList);
+        CountryAdapter adapter = new CountryAdapter(list, MainActivity.this, this);
+        rvCountry.setAdapter(adapter);
+        rvCountry.setLayoutManager(new LinearLayoutManager(MainActivity.this));
     }
 
 }

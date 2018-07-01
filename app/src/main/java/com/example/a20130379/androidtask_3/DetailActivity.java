@@ -1,18 +1,25 @@
 package com.example.a20130379.androidtask_3;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ahmadrosid.svgloader.SvgLoader;
 import com.example.a20130379.androidtask_3.RVCountryLists.Country;
+import com.example.a20130379.androidtask_3.RVCountryLists.Currency;
+import com.example.a20130379.androidtask_3.RVCountryLists.Language;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 public class DetailActivity extends AppCompatActivity  {
 
@@ -21,17 +28,7 @@ public class DetailActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        Country country = new Country();
-
-        ArrayList<Country> countryList = (ArrayList<Country>) getIntent().getSerializableExtra("detail");
-        String countryCode = getIntent().getStringExtra("keyDetail");
-
-        for (Country c : countryList) {
-            if (c.getNumericCode().equals(countryCode))
-            {
-                country = c;
-            }
-        }
+        Country country = (Country) getIntent().getSerializableExtra("detail");
 
         TextView country_name = (TextView) findViewById(R.id.country_name);
         country_name.setText(country.getName());
@@ -55,22 +52,25 @@ public class DetailActivity extends AppCompatActivity  {
         country_timezone.setText(TextUtils.join(", ", country.getTimezones()));
 
         TextView country_currency = (TextView) findViewById(R.id.country_currency);
-        country_currency.setText(country.getCurrencies().get(0).getName());
+        country_currency.setText(country.getCurrencies().stream().map(Currency::getName).collect(Collectors.joining(", ")));
 
         TextView country_lang = (TextView) findViewById(R.id.country_languages);
-        country_lang.setText(country.getLanguages().get(0).getName());
+        country_lang.setText(country.getLanguages().stream().map(Language::getName).collect(Collectors.joining(", ")));
 
+        TextView country_population = (TextView) findViewById(R.id.country_population);
+        country_population.setText(String.valueOf(country.getPopulation()));
 
-        /*Comparator<Country> c = new Comparator<Country>()
-        {
-            public int compare(Country c1, Country c2)
-            {
-                return c1.getNumericCode().compareTo(c2.getNumericCode());
+        TextView country_maps = (TextView) findViewById(R.id.country_maps);
+        String mapsUrl = "http://maps.google.com/maps?q=" + country.getName().replace(" ", "%20");
+        country_maps.setText(R.string.open_with_maps);
+        country_maps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent browser= new Intent(Intent.ACTION_VIEW, Uri.parse(mapsUrl));
+                startActivity(browser);
             }
-        };
+        });
 
-        int index = Collections.binarySearch(countryList, new Country(countryCode, 0), c);
-        country = countryList.get(index);*/
 
     }
 }

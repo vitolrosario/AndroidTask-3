@@ -23,18 +23,18 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
     private List<Country> mCountry;
     private Activity mActivity;
     private Context mContext;
+    private static RecyclerViewClickListener mItemListener;
     // Pass in the contact array into the constructor
-    public CountryAdapter(List<Country> country, Activity activity, Context context) {
+    public CountryAdapter(List<Country> country, Activity activity/*, Context context*/, RecyclerViewClickListener itemListener) {
         mCountry = country;
         mActivity = activity;
-        mContext = context;
+        mItemListener = itemListener;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         public TextView countryTextView;
-        public TextView countryCodeTextView;
         public ImageView flagImageView;
 
         // We also create a constructor that accepts the entire item row
@@ -43,24 +43,17 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
             // Stores the itemView in a public final member variable that can be used
             // to access the context from any ViewHolder instance.
             super(itemView);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    TextView countryCodeTextView = v.findViewById(R.id.country_code);
-                    String countryCode = countryCodeTextView.getText().toString();
-
-                    if(mContext instanceof MainActivity){
-                        ((MainActivity)mContext).CallDetailIntent(countryCode);
-                    }
-                }
-            });
+            itemView.setOnClickListener(this);
 
             countryTextView = (TextView) itemView.findViewById(R.id.country_name);
-            countryCodeTextView = (TextView) itemView.findViewById(R.id.country_code);
             flagImageView = (ImageView) itemView.findViewById(R.id.country_flag);
 
+        }
+
+        @Override
+        public void onClick(View v) {
+            Country country = mCountry.get(this.getLayoutPosition());
+            mItemListener.recyclerViewListClicked(v, country);
         }
     }
 
@@ -85,17 +78,12 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
         TextView countryText = viewHolder.countryTextView;
         countryText.setText(country.getName());
 
-        TextView countryCodeText = viewHolder.countryCodeTextView;
-        countryCodeText.setText(country.getNumericCode());
-
         ImageView flag = viewHolder.flagImageView;
 
         SvgLoader.pluck()
                 .with(this.mActivity)
                 .setPlaceHolder(R.mipmap.ic_launcher, R.mipmap.ic_launcher)
                 .load(country.getFlag(), flag);
-
-
     }
 
     // Returns the total count of items in the list
